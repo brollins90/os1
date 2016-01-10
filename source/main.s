@@ -2,8 +2,9 @@
 *	main.s
 *	 by Alex Chadwick
 *
-*	A sample assembly code implementation of the ok01 operating system, that 
-*	simply turns on the OK LED. 
+*	A sample assembly code implementation of the ok02 operating system, that 
+*	simply turns the OK LED on and off repeatedly.
+*	Changes since OK01 are marked with NEW.
 ******************************************************************************/
 
 /*
@@ -32,6 +33,8 @@ ldr r0,=0x20200000
 *				function select to enable output to GPIO 16. 
 * then
 * r1=0x00010000	a number with bit 16 high, so we can communicate with GPIO 16.
+* r2=0x003F0000 a number that will take a noticeable duration for the processor 
+*				to decrement to 0, allowing us to create a delay.
 */
 mov r1,#1
 lsl r1,#18
@@ -47,13 +50,41 @@ str r1,[r0,#4]
 mov r1,#1
 lsl r1,#16
 
-/* 
+/* NEW
+* Label the next line loop$ for the infinite looping
+*/
+loop$: 
+
+/*
 * Set GPIO 16 to low, causing the LED to turn on.
 */
 str r1,[r0,#40]
 
-/*
-* Loop over this forevermore
+/* NEW
+* Now, to create a delay, we busy the processor on a pointless quest to 
+* decrement the number 0x3F0000 to 0!
 */
-loop$: 
+mov r2,#0x3F0000
+wait1$:
+	sub r2,#1
+	cmp r2,#0
+	bne wait1$
+
+/* NEW
+* Set GPIO 16 to high, causing the LED to turn off.
+*/
+str r1,[r0,#28]
+
+/* NEW
+* Wait once more.
+*/
+mov r2,#0x3F0000
+wait2$:
+	sub r2,#1
+	cmp r2,#0
+	bne wait2$
+
+/*
+* Loop over this process forevermore
+*/
 b loop$
