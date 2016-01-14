@@ -1,7 +1,7 @@
 /*
 
     Part of the Raspberry-Pi Bare Metal Tutorials
-    Copyright (c) 2013, Brian Sidebotham
+    Copyright (c) 2013-2015, Brian Sidebotham
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -28,34 +28,22 @@
 
 */
 
-extern int __bss_start__;
-extern int __bss_end__;
+#ifndef RPI_BASE_H
+#define RPI_BASE_H
 
-extern void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags );
+#include <stdint.h>
 
-void _cstartup( unsigned int r0, unsigned int r1, unsigned int r2 )
-{
-    int* bss = &__bss_start__;
-    int* bss_end = &__bss_end__;
+#ifdef RPI2
+    #define PERIPHERAL_BASE     0x3F000000UL
+#else
+    #define PERIPHERAL_BASE     0x20000000UL
+#endif
 
-    /*
-        Clear the BSS section
+typedef volatile uint32_t rpi_reg_rw_t;
+typedef volatile const uint32_t rpi_reg_ro_t;
+typedef volatile uint32_t rpi_reg_wo_t;
 
-        See http://en.wikipedia.org/wiki/.bss for further information on the
-            BSS section
+typedef volatile uint64_t rpi_wreg_rw_t;
+typedef volatile const uint64_t rpi_wreg_ro_t;
 
-        See https://sourceware.org/newlib/libc.html#Stubs for further
-            information on the c-library stubs
-    */
-    while( bss < bss_end )
-        *bss++ = 0;
-
-    /* We should never return from main ... */
-    kernel_main( r0, r1, r2 );
-
-    /* ... but if we do, safely trap here */
-    while(1)
-    {
-        /* EMPTY! */
-    }
-}
+#endif

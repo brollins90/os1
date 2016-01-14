@@ -1,7 +1,6 @@
 /*
-
     Part of the Raspberry-Pi Bare Metal Tutorials
-    Copyright (c) 2013, Brian Sidebotham
+    Copyright (c) 2013-2015, Brian Sidebotham
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -28,34 +27,28 @@
 
 */
 
-extern int __bss_start__;
-extern int __bss_end__;
+#ifndef RPI_SYSTIMER_H
+#define RPI_SYSTIMER_H
 
-extern void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags );
+#include <stdint.h>
 
-void _cstartup( unsigned int r0, unsigned int r1, unsigned int r2 )
-{
-    int* bss = &__bss_start__;
-    int* bss_end = &__bss_end__;
+#include "rpi-base.h"
 
-    /*
-        Clear the BSS section
+#define RPI_SYSTIMER_BASE       ( PERIPHERAL_BASE + 0x3000 )
 
-        See http://en.wikipedia.org/wiki/.bss for further information on the
-            BSS section
 
-        See https://sourceware.org/newlib/libc.html#Stubs for further
-            information on the c-library stubs
-    */
-    while( bss < bss_end )
-        *bss++ = 0;
+typedef struct {
+    volatile uint32_t control_status;
+    volatile uint32_t counter_lo;
+    volatile uint32_t counter_hi;
+    volatile uint32_t compare0;
+    volatile uint32_t compare1;
+    volatile uint32_t compare2;
+    volatile uint32_t compare3;
+    } rpi_sys_timer_t;
 
-    /* We should never return from main ... */
-    kernel_main( r0, r1, r2 );
 
-    /* ... but if we do, safely trap here */
-    while(1)
-    {
-        /* EMPTY! */
-    }
-}
+extern rpi_sys_timer_t* RPI_GetSystemTimer(void);
+extern void RPI_WaitMicroSeconds( uint32_t us );
+
+#endif
