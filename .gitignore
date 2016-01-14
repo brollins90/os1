@@ -1,4 +1,5 @@
 *.list
 *.map
 *.img
-/build
+*.stackdump
+/bin
